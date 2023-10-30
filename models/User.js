@@ -19,6 +19,11 @@ const User = sequelize.define('user', {
   discord_id: {
     type: Sequelize.DataTypes.INTEGER,
     allowNull: false
+  },
+  isMember: {
+    type: Sequelize.DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false
   }
 }, {
   include: []

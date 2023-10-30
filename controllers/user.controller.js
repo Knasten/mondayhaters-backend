@@ -1,6 +1,7 @@
 const { User, sequelize } = require('../models/User');
 
 const addUser = async (profile) => {
+  console.log(profile)
   const user = await User.create({username: profile.username, discord_id: profile.id});
   if(user === null){
     throw new Error('User could not be created')
@@ -18,6 +19,7 @@ const findUserByPk = async (id) => {
   const user = await User.findByPk(id)
   return user;
 };
+
 
 module.exports = {
   addUser,

@@ -22,17 +22,26 @@ passport.use(new DiscordStrategy({
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     const {id:discord_id, username, guilds} = profile;
-    const user = await findUserByDiscordId(discord_id)
-    if(user) {
-      console.log('User found!')
-      // User found
-      return done(null, user)
-    } else {
+    let user = await findUserByDiscordId(discord_id)
+    if(!user) {
       // No User found creating and adding a new
       console.log('No user found!')
-      const newUser = await addUser(profile)
-      return done(null, newUser)
+      user = await addUser(profile)
     }
+
+    // Check if user is member of the correct channel
+    for(const guild of guilds){
+      console.log(guild.name)
+      if(guild.name === process.env.GUILD_NAME){
+        user.isMember = true;
+        await user.save()
+        break;
+      } else {
+        user.isMember = false;
+        await user.save()
+      }}
+
+    return done(null, user);
   } catch (err) {
     // Error Occured!
     console.log('ERROR-DISC-AUTH:', err)
