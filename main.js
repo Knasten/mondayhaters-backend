@@ -33,6 +33,9 @@ app.use('/items', itemsRoute)
 const authRoute = require('./routes/auth');
 app.use('/auth', authRoute)
 
+const reservationRoute = require('./routes/reservation');
+app.use('/reservation', reservationRoute)
+
 app.listen({port:PORT}, async() => {
   console.log('Listening on port: ' + PORT)
 })

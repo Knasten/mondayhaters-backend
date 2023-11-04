@@ -1,9 +1,5 @@
-const Sequelize = require('sequelize');
-
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: './db/test.sqlite'
-})
+const Sequelize = require('sequelize')
+const {sequelize} = require('../db/Connection')
 
 const Item = sequelize.define('item', {
   // This will be added by the user upon adding items
@@ -42,9 +38,9 @@ const Item = sequelize.define('item', {
 });
 
 Item.sync().then(() => {
-  console.log('Model and table succesful sync')
+  console.log('ITEM: Success')
 }).catch(e => {
   console.error('Error syncing data')
 })
 
-module.exports = {Item, sequelize};
+module.exports = { Item };

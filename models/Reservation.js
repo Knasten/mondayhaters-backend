@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize')
-const {sequelize} = require('./Connection')
+const {sequelize} = require('../db/Connection')
 
 const Reservation = sequelize.define('reservation', {
   raid: {

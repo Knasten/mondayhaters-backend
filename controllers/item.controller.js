@@ -1,4 +1,4 @@
-const {Item, sequelize} = require('../models/Item');
+const { Item } = require('../models/Item');
 
 const addItem = async (itemData) => {
   if (itemData.quality === 'Legendary') {

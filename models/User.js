@@ -1,9 +1,6 @@
-const Sequelize = require('sequelize');
+const Sequelize = require('sequelize')
+const {sequelize} = require('../db/Connection')
 
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: './db/test.sqlite'
-})
 
 const User = sequelize.define('user', {
   id: {
@@ -29,10 +26,11 @@ const User = sequelize.define('user', {
   include: []
 })
 
+
 User.sync().then(() => {
   console.log('USER: Model and table succesful sync')
 }).catch(e => {
   console.error('USER: Error syncing data')
 })
 
-module.exports = { User, sequelize }
+module.exports = { User }

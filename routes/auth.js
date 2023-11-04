@@ -3,7 +3,7 @@ const passport = require('passport');
 
 router.get('/', passport.authenticate('discord'));
 router.get('/redirect', passport.authenticate('discord', {
-  failureRedirect: '/forbidden',
+  failureRedirect: 'http://localhost:3000/',
   successRedirect: 'http://localhost:3000/'
 }));
 

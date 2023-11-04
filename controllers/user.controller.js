@@ -1,4 +1,4 @@
-const { User, sequelize } = require('../models/User');
+const { User } = require('../models/User');
 
 const addUser = async (profile) => {
   console.log(profile)
