@@ -1,17 +1,21 @@
-const { addUser, findUserByDiscordId, findUserByPk } = require('../controllers/user.controller');
-
 const DiscordStrategy = require('passport-discord').Strategy;
 const passport = require('passport');
+const {getAllUsers} = require('./helper');
+const {db} = require('../db/firebase');
 
 
 passport.serializeUser((user, done) => {
   done(null, user.id)
 });
 
-passport.deserializeUser((id, done) => {
-  const user = findUserByPk(id)
-  if(user)
-    done(null, user);
+passport.deserializeUser(async (id, done) => {
+  // Id being passed in here is the normal userId not the discord one.
+  const docRef = db.collection('Users').doc(id)
+  const docSnapshot = await docRef.get();
+  if(docSnapshot.exists) {
+    const userData = docSnapshot.data();
+    done(null, userData);
+  }
 });
 
 passport.use(new DiscordStrategy({
@@ -21,16 +25,28 @@ passport.use(new DiscordStrategy({
   scope: ['identify', 'guilds']
 }, async (accessToken, refreshToken, profile, done) => {
   try {
-    const {id:discord_id, username, guilds} = profile;
+    const {id, username, guilds} = profile;
+    const userRef = db.collection('Users');
 
     // Check if user is member of the correct channel
     for(const guild of guilds){
       if(guild.name === process.env.GUILD_NAME){
-        let user = await findUserByDiscordId(discord_id)
+        let user;
+        const docs = await getAllUsers();
+        docs.forEach((doc) => {
+          if(doc.discord_id === id){
+            user = doc;
+          }
+        })
+        console.log(user)
+
         if(!user) {
-          // No User found creating and adding a new
-          console.log('No user found!')
-          user = await addUser(profile)
+          // Since no user was found it will be undefined and we need to update and create a new one
+          user = await userRef.add({
+            discord_id: id,
+            username,
+            isMember: true
+          })
         }
         return done(null, user);
       }
@@ -38,11 +54,9 @@ passport.use(new DiscordStrategy({
 
     // If it reaches this step the user is not part of the guild
     // And the login should be treated as invalid
-    throw new Error('It seems you have not joined our discord')
+    throw new Error('Unauthorized Access', 403)
     
   } catch (err) {
-    // Error Occured!
-    console.log('ERROR-DISC-AUTH:', err)
     return done(null, null)
   }
 }));
