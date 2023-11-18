@@ -6,24 +6,19 @@ const {db} = require('../db/firebase');
 
 router.get('/', async (req, res) => {
   if(req.isAuthenticated()){
+    const raidName = req.query.raid;
     try{
-      const itemsSnapshot = await db.collection('Items').get();
-      const items = [];
-      // Loop through response from firestore
-      itemsSnapshot.forEach((doc) => {
-        // Push each item to array
-        items.push({
-          id: doc.id,
-          ...doc.data()
-        })
-      })
-      // If all succeeded return items
-      return res.status(200).json({status: 'Success', message: items})
+      console.log('getting items')
+      const docRef = db.collection('Items');
+      const docSnapshot = await docRef.doc(raidName).get();
+      return res.status(200).json({status: 'Success', message: docSnapshot.data()})
     } catch (err) {
       // If encountering error send back error, this should be more dynamic
       res.status(500)
       res.send({status: 'error', message: 'Items could not be fetched..'})
     }
+  } else {
+    res.status(401).json({message: 'Unauthorized access'});
   }
 });
   
@@ -54,24 +49,22 @@ router.post('/:id', async (req, res) => {
     const { droppedBy, name, quality, raid } = req.body;
     const isLootable = quality === 'Legendary' ? false : true;
 
-    const documentId = req.params.id
-    const docRef = db.collection('Items').doc(documentId);
-    const docSnapshot = await docRef.get();
-
-    if(docSnapshot.exists){
-      // If we reach this code we know an item does not exist and we can continue to post a new
-      return res.status(400).json({error: 'Item ID already exists'});
-    }
+    const fieldId = req.params.id
+    const docRef = db.collection('Items').doc(raid);
+    
     const newItem = {
-      droppedBy,
-      isLootable,
-      name,
-      quality,
-      raid
+      [fieldId] : {
+        droppedBy,
+        isLootable,
+        name,
+        quality,
+      }
     }
-    await docRef.set(newItem);
-    res.status(200).json({message: 'Successfully added item: ' + documentId ,newItem})
+    const docSnapshot = await docRef.set(newItem, { merge: true });
+    console.log(docSnapshot)
+    res.status(200).json({message: 'Successfully added item: ' + fieldId ,newItem})
   } catch(error) {
+    console.error(error)
     res.status(500).json({message: error.message})
   }
 })
