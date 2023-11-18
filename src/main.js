@@ -8,8 +8,9 @@ const app = express();
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
-const discordAuthStrategy = require('./strategies/discordAuthStrategy');
+const discordAuthStrategy = require('./strategies/discordAuthStrategy.js');
 const {db} = require('./db/firebase.js');
+const functions = require('firebase-functions');
 
 
 // CORS setup
@@ -37,15 +38,19 @@ app.use(passport.session());
 
 
 // Routes
-const itemsRoute = require('./routes/items');
+const itemsRoute = require('./routes/items.js');
 app.use('/items', itemsRoute)
 
-const authRoute = require('./routes/auth');
+const authRoute = require('./routes/auth.js');
 app.use('/auth', authRoute)
 
-const reservationRoute = require('./routes/reservation');
+const reservationRoute = require('./routes/reservation.js');
 app.use('/reservation', reservationRoute)
 
 app.listen({port:PORT}, async() => {
   console.log('Listening on port: ' + PORT)
 })
+
+
+// Set the app as default handler for request
+exports.api = functions.https.onRequest(app);
